@@ -1,0 +1,17 @@
+{   "data_path": "/scratch/gpfs/jz6521/lc_train/data/theory_test/orth/trained_RNN_lambda_orth=0_300trials.pkl", 
+    "save_dir": "theory_orthoR=0_orthLC=0", 
+    "base_path": "/scratch/gpfs/jz6521/latent_circuit_theory", 
+    "epochs": 6000,  
+    "lr": 0.01,
+    "alpha": 0.2,
+    "l_z": 1,
+    "lx_min": 0,
+    "lx_max": 1,
+    "lx_steps": 4,
+    "ns": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "verbose": false,
+    "tr_val_split_seed": 0, 
+    "pos_input": true, 
+    "pos_output": true,
+    "nmodels": 200
+}
