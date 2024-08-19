@@ -119,9 +119,9 @@ class LatentNet(torch.nn.Module):
             
             x = self.forward(u) # forward pass
 
-            tr_ez, tr_ex, tr_orth, loss = self.loss_function(x[tr_mask], y[tr_mask], z[tr_mask], l_x, l_z) # only compute on tr samples
+            tr_ez, tr_ex, loss = self.loss_function(x[tr_mask], y[tr_mask], z[tr_mask], l_x, l_z) # only compute on tr samples
 
-            val_ez, val_ex, val_orth, val_loss = self.loss_function(x[val_mask], y[val_mask], z[val_mask], l_x, l_z) # compute on withheld samples
+            val_ez, val_ex, val_loss = self.loss_function(x[val_mask], y[val_mask], z[val_mask], l_x, l_z) # compute on withheld samples
 
             loss.backward()  # compute gradient
             optimizer.step() # update params
@@ -133,12 +133,12 @@ class LatentNet(torch.nn.Module):
             val_acc_history.append(self.acc(z[val_mask], self.output_layer(x[val_mask])))
 
             # save loss terms
-            train_loss_history.append([tr_ez, tr_ex, tr_orth, loss.item()])
-            val_loss_history.append([val_ez, val_ex, val_orth, val_loss.item()])
+            train_loss_history.append([tr_ez, tr_ex, loss.item()])
+            val_loss_history.append([val_ez, val_ex, val_loss.item()])
             
             if verbose:
                 if i % 10 == 0:
-                    self.report(i, epochs, val_ez, val_ex, val_orth, loss, val_loss, train_acc_history[-1], val_acc_history[-1])
+                    self.report(i, epochs, val_ez, val_ex, loss, val_loss, train_acc_history[-1], val_acc_history[-1])
         
             # clip self.input_layer.weight.data to be >= 0
             with torch.no_grad():
@@ -164,9 +164,12 @@ class LatentNet(torch.nn.Module):
         a_mat = torch_detach(self.a)
         q_mat = torch_detach(self.q)
 
+        alpha = torch_detach(self.alpha)
+        sigma_rec = torch_detach(self.sigma_rec)
+
         return  train_loss_history, val_loss_history, \
                 train_acc_history, val_acc_history, \
                 x, zhat, val_mask, tr_mask, \
                 recurrent_weights, input_weights, output_weights, \
-                a_mat, q_mat, self.alpha, self.sigma_rec, \
+                a_mat, q_mat, alpha, sigma_rec, \
                 l_x, l_z, lr, epochs

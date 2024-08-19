@@ -1,10 +1,10 @@
 import numpy as np
 
-from src.util.util_config import *
-from src.train_latent_net import *
+from util_config import *
+from util_train import *
 
 # training loop given replicate index and config file
-def training_loop(m, config_fn):
+def training_loop(m, config_fn, job_id=0):
 
     # load config dictionary from json file
     CONFIG = json_to_config(config_fn)
@@ -32,9 +32,6 @@ def training_loop(m, config_fn):
 
     if not os.path.exists(f'{base_path}/{save_dir}/models'):
         os.makedirs(f'{base_path}/{save_dir}/models')
-        
-    # dump json to current folder for the record
-    config_to_json(CONFIG, f'{base_path}/{save_dir}/models/model_config.json')
 
     for n in ns:
         for lxi in range(lx_steps):
@@ -42,7 +39,7 @@ def training_loop(m, config_fn):
             # train model
             print(f'n = {n}, model {m}, lx {l_x}')
             results = train_lc(data_path, n=n, lr=lr, alpha=alpha,
-                               epochs=epochs, l_x=l_x, l_z=l_z,
+                               epochs=epochs, l_x=l_x, l_z=l_z, sigma_rec=sigma_rec,
                                tr_val_split_seed=tr_val_split_seed,
                                pos_input=pos_input, pos_output=pos_output,
                                verbose=verbose)
@@ -53,7 +50,7 @@ def training_loop(m, config_fn):
             alpha, sigma_rec, l_x, l_z, lr, epochs = results
             
             # save loss history
-            np.savez(f'{base_path}/{save_dir}/models/results_n{n}_m{m}_lx{lxi}.npz',
+            np.savez(f'{base_path}/{save_dir}/models/results_n{n}_m{m}_lx{lxi}_{job_id}.npz',
                      train_loss=train_loss, val_loss=val_loss, train_acc=train_acc, val_acc=val_acc,
                      x=x, zhat=zhat, wrec=wrec, win=win, wout=wout,
                      a_mat=a_mat, q_mat=q_mat, val_mask=val_mask, tr_mask=tr_mask, alpha=alpha, sigma_rec=sigma_rec,
