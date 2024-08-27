@@ -55,7 +55,7 @@ def get_train_val_idx(n_samples, seed=0, split_frac=0.7):
 
 # train an instance of a latent circuit
 def train_lc(data_path, n=30, lr=.01, l_x=1, l_z=1, 
-             alpha=0.2, sigma_rec=0.15,
+             alpha=0.2, sigma_rec=0.15, patience=20, stop_thresh=0.001,
              epochs=500, verbose=False, tr_val_split_seed=42, 
              pos_input=False, pos_output=False):
 
@@ -84,7 +84,7 @@ def train_lc(data_path, n=30, lr=.01, l_x=1, l_z=1,
     model.to(device)
     
     results = model.fit(U, Y, Z, tr_mask=tr_mask, val_mask=val_mask, 
-                        l_x=l_x, l_z=l_z, lr=lr,
+                        l_x=l_x, l_z=l_z, lr=lr, patience=patience, stop_thresh=stop_thresh, 
                         epochs=epochs, verbose=verbose)
 
     toc = time.time()

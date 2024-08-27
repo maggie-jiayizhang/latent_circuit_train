@@ -5,7 +5,7 @@ DATA_PATH  = "/scratch/gpfs/jz6521/lc_train/data/theory_test/orth/trained_RNN_la
 SAVE_DIR = "match_alpha"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
-LR = 0.001 # learning rate
+LR = 0.01 # learning rate
 ALPHA = 0.1
 LZ = 1
 LX_MIN = 0
@@ -15,6 +15,8 @@ SIGMA_REC = 0.15
 NS = [6, 7, 8, 9, 10, 5, 4, 3]
 VERBOSE = False
 TR_VAL_SPLIT_SEED = 0
+STOP_THRESH = 0.001
+PATIENCE = 20
 POS_INPUT = True
 POS_OUTPUT = True
 NMODELS = 200
@@ -34,6 +36,8 @@ def generate_config(fn="config.json"):
                    "ns": NS,
                    "verbose": VERBOSE,
                    "tr_val_split_seed": TR_VAL_SPLIT_SEED,
+                   "patience": PATIENCE,
+                   "stop_thresh": STOP_THRESH,
                    "pos_input": POS_INPUT, 
                    "pos_output": POS_OUTPUT,
                    "nmodels": NMODELS

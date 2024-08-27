@@ -106,13 +106,16 @@ class LatentNet(torch.nn.Module):
         print("val_acc: {:.4f}".format(val_acc))
 
     # Fitting
-    def fit(self, u, y, z, tr_mask, val_mask, lr=.01, l_x=1, l_z=1, 
-            epochs=100, verbose=False):
+    def fit(self, u, y, z, tr_mask, val_mask, lr, l_x=1, l_z=1, 
+            epochs=100, patience=20, stop_thresh=0.001, verbose=False):
         optimizer = torch.optim.Adam(self.parameters(), lr=lr, 
                                      weight_decay=0.001)
         # save loss history
         train_loss_history, val_loss_history = [],[]
         train_acc_history, val_acc_history = [],[]
+
+        # loss record for early stopping
+        loss_rec, loss_acc = None, 0
 
         for i in range(epochs):
             optimizer.zero_grad() # zero out grad for each epoch
@@ -148,6 +151,18 @@ class LatentNet(torch.nn.Module):
                 if self.pos_output:
                     self.output_layer.weight.data = torch.clamp(self.output_layer.weight.data, min=0)
             
+            # for early stopping
+            # when validation loss is not improving significantly
+            # (stagnant) consider stopping training
+            if (loss_rec is None or (val_loss + stop_thresh) < loss_rec):
+                loss_rec = loss
+                loss_acc = 0
+            else:
+                loss_acc += 1
+
+            if (loss_acc == patience): # end if no improvement of training loss
+                break
+            
         # compute final predictions
         self.eval()
         x = self.forward(u)
@@ -171,5 +186,4 @@ class LatentNet(torch.nn.Module):
                 train_acc_history, val_acc_history, \
                 x, zhat, val_mask, tr_mask, \
                 recurrent_weights, input_weights, output_weights, \
-                a_mat, q_mat, alpha, sigma_rec, \
-                l_x, l_z, lr, epochs
+                a_mat, q_mat, val_loss_history.shape[0]
