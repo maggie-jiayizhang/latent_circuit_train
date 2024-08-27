@@ -2,17 +2,17 @@ import os
 from util_config import *
 
 DATA_PATH  = "/scratch/gpfs/jz6521/lc_train/data/theory_test/orth/trained_RNN_lambda_orth=0_300trials.pkl"
-SAVE_DIR = "test_lx"
+SAVE_DIR = "match_alpha"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
-LR = 0.01 # learning rate
-ALPHA = 0.2
+LR = 0.001 # learning rate
+ALPHA = 0.1
 LZ = 1
 LX_MIN = 0
 LX_MAX = 1
 LX_STEPS = 5
 SIGMA_REC = 0.15
-NS = [3, 4, 5, 6, 7, 8, 9, 10]
+NS = [6, 7, 8, 9, 10, 5, 4, 3]
 VERBOSE = False
 TR_VAL_SPLIT_SEED = 0
 POS_INPUT = True
