@@ -1,8 +1,8 @@
 import os
 from util_config import *
 
-DATA_PATH  = "/scratch/gpfs/jz6521/lc_train/data/theory_test/orth/trained_RNN_lambda_orth=0_300trials.pkl"
-SAVE_DIR = "match_alpha"
+DATA_PATH  = "/scratch/gpfs/jz6521/latent_circuit_theory/rnn_data/rnn_perf_results_n6_m5_lx2_58489134.npy"
+SAVE_DIR = "base_case"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
 LR = 0.01 # learning rate
@@ -44,9 +44,13 @@ def generate_config(fn="config.json"):
                    }
     
     batch_dir = os.path.join(BASE_PATH, SAVE_DIR)
+
     if not os.path.exists(batch_dir):
         os.makedirs(batch_dir)
     config_to_json(config_dict, os.path.join(batch_dir, fn))
+
+    if not os.path.exists(f'{batch_dir}/models'):
+        os.makedirs(f'{batch_dir}/models')
 
 if __name__ == "__main__":
     generate_config()

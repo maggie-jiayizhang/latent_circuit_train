@@ -5,6 +5,21 @@ from latent_net import *
 
 def load_data(path_to_data, device):
     # load actual neural (unit) activities from path
+    all_data = np.load(path_to_data, allow_pickle=True).item()
+
+    Y = all_data['Y']
+    U = all_data['U']
+    Z = all_data['Z']
+
+    if device is not None: ## convert all arrays to tensors
+        Y = torch.tensor(Y, device=device).float()
+        Z = torch.tensor(Z, device=device).float()
+        U = torch.tensor(U, device=device).float()
+    
+    return Y, Z, U
+
+def load_data_deprecate(path_to_data, device):
+    # load actual neural (unit) activities from path
     all_data = np.load(path_to_data, allow_pickle=True)
 
     Y = all_data['traces'] 

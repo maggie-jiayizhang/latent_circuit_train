@@ -186,4 +186,4 @@ class LatentNet(torch.nn.Module):
                 train_acc_history, val_acc_history, \
                 x, zhat, val_mask, tr_mask, \
                 recurrent_weights, input_weights, output_weights, \
-                a_mat, q_mat, val_loss_history.shape[0]
+                a_mat, q_mat, len(val_loss_history)
