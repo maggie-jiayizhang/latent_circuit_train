@@ -2,7 +2,7 @@ import os
 from util_config import *
 
 DATA_PATH  = "/scratch/gpfs/jz6521/latent_circuit_theory/rnn_data/rnn_perf_results_n6_m5_lx2_58489134.npy"
-SAVE_DIR = "base_case"
+SAVE_DIR = "test_t0"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
 LR = 0.01 # learning rate
@@ -12,11 +12,11 @@ LX_MIN = 0
 LX_MAX = 1
 LX_STEPS = 5
 SIGMA_REC = 0.15
-NS = [6, 7, 8, 9, 10, 5, 4, 3]
+NS = [6, 7, 12, 4]
 VERBOSE = False
 TR_VAL_SPLIT_SEED = 0
 STOP_THRESH = 0.001
-PATIENCE = 20
+PATIENCE = 30
 POS_INPUT = True
 POS_OUTPUT = True
 NMODELS = 200

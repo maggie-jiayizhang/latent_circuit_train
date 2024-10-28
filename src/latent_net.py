@@ -1,37 +1,28 @@
 '''
 The following code was written by Chris Langdon;
 Edited and adapted by Jiayi Zhang.
+
+Note: latent circuit is a sub-class of RNN.
 '''
 
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.autograd.functional import hessian # compute hessian
+from RNN import *
 
 torch.autograd.set_detect_anomaly(True)
 
-def torch_detach(ts):
-    return ts.detach().cpu().numpy()
-
-# define the latent net class
-class LatentNet(torch.nn.Module):
+# define the latent net class (subclass of RNN)
+class LatentNet(RNN):
     def __init__(self, n, N, alpha=.2, sigma_rec=.15, input_size=6, 
                  output_size=2, pos_input=False, pos_output=False, 
                  device='cpu'):
-        super(LatentNet, self).__init__()
-        self.device = device
 
-        # time scale
-        self.alpha = torch.tensor(alpha, device=device)
-        # noise
-        self.sigma_rec = torch.tensor(sigma_rec, device=device)
+        super(LatentNet, self).__init__(N, alpha, sigma_rec, input_size,
+              output_size, pos_input, pos_output, device)
         
         self.n = n # latent circuit size
-        self.N = N # original system size
-        self.input_size = input_size
-        self.output_size = output_size
-        self.activation = torch.nn.ReLU()
-        self.pos_input = pos_input
-        self.pos_output = pos_output
 
         # initialize latent circuit layers
         self.recurrent_layer = nn.Linear(self.n, self.n, bias=False)
@@ -57,18 +48,9 @@ class LatentNet(torch.nn.Module):
         o = (eye - skew) @ torch.inverse(eye + skew)
         return o[:self.n, :]
 
-    # Forward pass of the latent RNN
-    def forward(self, u):
-        t = u.shape[1]
-        states = torch.zeros(u.shape[0], 1, self.n, device=self.device)
-        batch_size = states.shape[0]
-        # noise outside input layer private to each node
-        noise = torch.sqrt(2*self.alpha*self.sigma_rec**2) * torch.empty(batch_size, t, self.n).normal_(mean=0, std=1).to(device=self.device)
-        for i in range(t - 1):
-            state_new = (1 - self.alpha) * states[:, i, :] + self.alpha * (
-                self.activation(self.recurrent_layer(states[:, i, :]) + self.input_layer(u[:, i, :]) + noise[:, i, :]))
-            states = torch.cat((states, state_new.unsqueeze_(1)), 1)
-        return states
+    # Forward pass of the latent circuit
+    def forward(self, u, states):
+        return super().forward(u, states)
 
     # Loss function for latent circuit model
     def loss_function(self, x, y, z, l_x, l_z):
@@ -95,11 +77,10 @@ class LatentNet(torch.nn.Module):
         return torch.sum((pred[:,-1,0]>pred[:,-1,1])==true[:,-1,0]).item() / len(true)
 
     # Report current losses
-    def report(self, e, epochs, mse_z, mse_x, orth, tr_loss, val_loss, tr_acc, val_acc):
+    def report(self, e, epochs, mse_z, mse_x, tr_loss, val_loss, tr_acc, val_acc):
         print('Epoch: {}/{}.............'.format(e, epochs), end=' ')
         print("val mse_z: {:.4f}".format(mse_z), end=' ')
         print("val mse_x: {:.4f}".format(mse_x), end=' ')
-        print("val orth: {:.4f}".format(orth), end='  ')
         print("train_loss: {:.4f}".format(tr_loss), end=' ')
         print("val_loss: {:.4f}".format(val_loss), end=' ')
         print("train_acc: {:.4f}".format(tr_acc), end=' ')
@@ -120,7 +101,10 @@ class LatentNet(torch.nn.Module):
         for i in range(epochs):
             optimizer.zero_grad() # zero out grad for each epoch
             
-            x = self.forward(u) # forward pass
+            # set t0 state to the output
+            states = super().make_state_matrix(u)
+            states[:,0,:] = y[:,0,:] @ self.q.T
+            x = self.forward(u, states) # forward pass
 
             tr_ez, tr_ex, loss = self.loss_function(x[tr_mask], y[tr_mask], z[tr_mask], l_x, l_z) # only compute on tr samples
 
@@ -165,7 +149,9 @@ class LatentNet(torch.nn.Module):
             
         # compute final predictions
         self.eval()
-        x = self.forward(u)
+        states = super().make_state_matrix(u)
+        states[:,0,:] = y[:,0,:] @ self.q.T
+        x = self.forward(u, states) # forward pass
         zhat = self.output_layer(x)
 
         # move x, z to cpu
@@ -179,11 +165,18 @@ class LatentNet(torch.nn.Module):
         a_mat = torch_detach(self.a)
         q_mat = torch_detach(self.q)
 
-        alpha = torch_detach(self.alpha)
-        sigma_rec = torch_detach(self.sigma_rec)
-
         return  train_loss_history, val_loss_history, \
                 train_acc_history, val_acc_history, \
                 x, zhat, val_mask, tr_mask, \
                 recurrent_weights, input_weights, output_weights, \
                 a_mat, q_mat, len(val_loss_history)
+
+
+def traj_loss_scaler(weights):
+    pass
+
+def beh_loss_scaler(weights):
+    pass
+
+def compute_hessian():
+    pass
