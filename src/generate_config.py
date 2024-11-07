@@ -2,7 +2,7 @@ import os
 from util_config import *
 
 DATA_PATH  = "/scratch/gpfs/jz6521/latent_circuit_theory/rnn_data/rnn_perf_results_n6_m5_lx2_58489134.npy"
-SAVE_DIR = "test_t0"
+SAVE_DIR = "test_hess"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
 LR = 0.01 # learning rate
