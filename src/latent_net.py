@@ -14,6 +14,7 @@ from RNN import *
 torch.autograd.set_detect_anomaly(True)
 
 # define the latent net class (subclass of RNN)
+### NOTE: give a specific q to the model so we only learn the latent circuit ###
 class LatentNet(RNN):
     def __init__(self, n, N, alpha=.2, sigma_rec=.15, input_size=6, 
                  output_size=2, pos_input=False, pos_output=False, 
@@ -35,10 +36,10 @@ class LatentNet(RNN):
         self.output_layer = nn.Linear(self.n, self.output_size, bias=False)
         self.output_layer.weight.data.normal_(mean=1/np.sqrt(self.n), 
                                               std=1/np.sqrt(self.n))
+        self.q = None
 
-        self.a = torch.nn.Parameter(torch.rand(self.N, self.N, device=device),
-                                    requires_grad=True)
-        self.q = self.cayley_transform(self.a)
+    def set_q(self, q):
+        self.q = q
 
     # Tansform a square matric into a rectangular orthonormal matrix
     def cayley_transform(self, a):
@@ -112,8 +113,7 @@ class LatentNet(RNN):
 
             loss.backward()  # compute gradient
             optimizer.step() # update params
-
-            self.q = self.cayley_transform(self.a)
+            # no need to update q since it's frozen
 
             # compute accuracy
             train_acc_history.append(self.acc(z[tr_mask], self.output_layer(x[tr_mask])))
@@ -162,21 +162,10 @@ class LatentNet(RNN):
         recurrent_weights = torch_detach(self.recurrent_layer.weight.data)
         input_weights = torch_detach(self.input_layer.weight.data)
         output_weights = torch_detach(self.output_layer.weight.data)
-        a_mat = torch_detach(self.a)
         q_mat = torch_detach(self.q)
 
         return  train_loss_history, val_loss_history, \
                 train_acc_history, val_acc_history, \
                 x, zhat, val_mask, tr_mask, \
                 recurrent_weights, input_weights, output_weights, \
-                a_mat, q_mat, len(val_loss_history)
-
-
-def traj_loss_scaler(weights):
-    pass
-
-def beh_loss_scaler(weights):
-    pass
-
-def compute_hessian():
-    pass
+                q_mat, len(val_loss_history)

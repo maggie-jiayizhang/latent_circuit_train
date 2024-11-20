@@ -2,7 +2,7 @@ import os
 from util_config import *
 
 DATA_PATH  = "/scratch/gpfs/jz6521/latent_circuit_theory/rnn_data/rnn_perf_results_n6_m5_lx2_58489134.npy"
-SAVE_DIR = "test_hess"
+SAVE_DIR = "freeze_q"
 BASE_PATH = "/scratch/gpfs/jz6521/latent_circuit_theory"
 EPOCHS = 5000
 LR = 0.01 # learning rate
@@ -12,8 +12,8 @@ LX_MIN = 0
 LX_MAX = 1
 LX_STEPS = 5
 SIGMA_REC = 0.15
-NS = [6, 7, 12, 4]
-VERBOSE = False
+NS = [6]
+VERBOSE = True
 TR_VAL_SPLIT_SEED = 0
 STOP_THRESH = 0.001
 PATIENCE = 30

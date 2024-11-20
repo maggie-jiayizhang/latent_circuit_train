@@ -18,6 +18,16 @@ def load_data(path_to_data, device):
     
     return Y, Z, U
 
+def load_q(path_to_data, device):
+    # load actual neural (unit) activities from path
+    all_data = np.load(path_to_data, allow_pickle=True).item()
+    Q = all_data["Q"]
+
+    if device is not None: ## convert all arrays to tensors
+        Q = torch.tensor(Q, device=device).float()
+    
+    return Q
+
 def load_data_deprecate(path_to_data, device):
     # load actual neural (unit) activities from path
     all_data = np.load(path_to_data, allow_pickle=True)
@@ -80,7 +90,9 @@ def train_lc(data_path, n=30, lr=.01, l_x=1, l_z=1,
 
     # load data
     Y, Z, U = load_data(data_path, device)
-    # print('U shape', U.shape, 'Z shape', Z.shape, 'Y shape', Y.shape)
+    
+    # load the correct Q
+    Q = load_q(data_path, device)
 
     # make training/validation binary mask
     tr_mask, val_mask = get_train_val_idx(Y.shape[0], seed=tr_val_split_seed)
@@ -97,6 +109,7 @@ def train_lc(data_path, n=30, lr=.01, l_x=1, l_z=1,
                       input_size=isize, output_size=osize, device=device,
                       pos_input=pos_input, pos_output=pos_output)
     model.to(device)
+    model.set_q(Q)
     
     results = model.fit(U, Y, Z, tr_mask=tr_mask, val_mask=val_mask, 
                         l_x=l_x, l_z=l_z, lr=lr, patience=patience, stop_thresh=stop_thresh, 
